@@ -14,8 +14,21 @@ export default function Navbar() {
       // For now just get name from localStorage, later can fetch from API
       const userName = localStorage.getItem('userName') || 'User';
       setUser({ name: userName });
+      getUserProfile();
     }
   }, []);
+
+  //get user profile
+  const getUserProfile = async () => {
+    //NEXT_PUBLIC_API_URL
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    const data = await response.json();
+    setUser(data);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');

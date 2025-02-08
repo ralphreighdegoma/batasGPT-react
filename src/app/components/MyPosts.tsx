@@ -3,6 +3,13 @@
 import Post from "./Post";
 
 export default function MyPosts() {
+  //get user from local storage
+  const user = localStorage.getItem('user');
+  const userData = JSON.parse(user);
+  const userAvatar = userData.avatar;
+  const userName = userData.name;
+  const userTitle = userData.title;
+  const userBio = userData.bio;
   const samplePosts = [
     {
       content: "Just finished working on an exciting case involving AI and intellectual property rights. The intersection of technology and law continues to present fascinating challenges. Looking forward to sharing more insights on this topic! #LegalTech #AI #IntellectualProperty",
@@ -23,6 +30,11 @@ export default function MyPosts() {
 
   return (
     <div className="space-y-6">
+      <Post
+        userAvatar={userAvatar}
+        userName={userName}
+        content=""
+      />
       {samplePosts.map((post, index) => (
         <Post
           key={index}
