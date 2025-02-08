@@ -1,0 +1,33 @@
+.cb {
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.j {
+    text-indent: 25px;
+    text-align: justify;
+}
+
+.cb img {
+    display: none;
+}
+
+img {
+    display: none;
+}
+
+.id {
+    display: none;
+}
+
+/* Hide any replacement characters */
+body {
+    unicode-bidi: isolate;
+    white-space: pre-wrap;
+}
+
+.remove-replacement-char::after {
+    content: "\FFFD";
+    display: none;
+}
