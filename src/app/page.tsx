@@ -3,13 +3,20 @@ import { useState } from "react";
 import SearchResult from "./components/SearchResult";
 import './styles/page.css';
 import SearchResultModal from './components/SearchResultModal';
-
+import SearchBar from './components/SearchBar';
+import Sidebar from './components/Sidebar';
 
 interface SearchResultType {
   id: number;
   title: string;
   content: string;
   reference_number: string;
+}
+
+interface SearchResult {
+  title: string;
+  case_number: string;
+  content: string;
 }
 
 export default function Page() {
@@ -46,44 +53,19 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen relative">
-
-
-      <div className="absolute inset-0 bg-white">
-        <div
-          className="absolute inset-0"
-        />
+    <div className="min-h-screen flex">
+      <div className="fixed top-0 left-0 w-64 mt-4 ml-4">
+        <Sidebar />
       </div>
 
-      <div className="relative flex flex-col items-center justify-center min-h-[70vh] px-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">BatasGPT</h1>
-        </div>
-
-        <div className="w-full max-w-2xl">
-          <div className="relative">
-            <div className="relative flex items-center w-full h-16 rounded-full border shadow-md hover:shadow-lg bg-white">
-              <div className="pl-6">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                className="w-full h-full pl-4 pr-12 text-lg text-gray-700 outline-none rounded-full"
-                placeholder="Search anything about Philippine laws..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className="absolute right-0 h-full px-6 text-white bg-rose-500 rounded-r-full hover:bg-rose-600 transition-colors disabled:bg-rose-300"
-              >
-                {isLoading ? "Searching..." : "Search"}
-              </button>
-            </div>
-          </div>
+      <div className="ml-72 flex-1 bg-white">
+        <div className="w-full max-w-2xl mx-auto mt-8">
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleSearch={handleSearch}
+            isLoading={isLoading}
+          />
 
           <div className="mt-8">
             {searchResults.length > 0 ? (

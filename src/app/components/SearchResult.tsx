@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-
+import Post from './Post';
 interface SearchResultProps {
   searchResults: {
     id: number;
@@ -13,29 +13,33 @@ interface SearchResultProps {
   handleSelected: (result: any) => void;
 }
 
-//handleSelected write the funciton
-
-
 export default function SearchResult({ searchResults, setIsOpen, handleSelected }: SearchResultProps) {
+  const [likes, setLikes] = useState(0);
+  const [views, setViews] = useState(Math.floor(Math.random() * 1000));
+  const [comments, setComments] = useState(Math.floor(Math.random() * 100));
+  const [shares, setShares] = useState(Math.floor(Math.random() * 50));
 
   const handleClick = (result: any) => {
     setIsOpen(true)
     handleSelected(result)
   };
-  
+
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const currentTime = new Date().toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   return (
-    <div className="mb-10 max-w-2xl mt-4">
-      <div className="text-sm text-gray-600 mb-1">
-        {searchResults.case_number}
-      </div>
-      
-      <h3 
-        className="text-xl text-blue-600 hover:underline cursor-pointer mb-1" 
-        onClick={() => handleClick(searchResults)}
-      >
-        {searchResults.title}
-      </h3>
-    </div>
+    <Post
+      userAvatar="/default-avatar.png"
+      userName={searchResults.case_number}
+      content={`${searchResults.title}`}
+    />
   );
 }
