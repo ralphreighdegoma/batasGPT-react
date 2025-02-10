@@ -17,7 +17,8 @@
         "react": "19.0.0-rc-66855b96-20241106",
         "react-dom": "19.0.0-rc-66855b96-20241106",
         "react-hot-toast": "^2.5.1",
-        "swiper": "^11.1.15"
+        "swiper": "^11.1.15",
+        "use-debounce": "^10.0.4"
     },
     "devDependencies": {
         "@types/node": "^20",
