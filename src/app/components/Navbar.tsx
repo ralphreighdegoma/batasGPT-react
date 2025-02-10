@@ -38,11 +38,11 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-white to-rose-50 shadow-xl relative z-50">
+    <nav className="bg-white shadow-md relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+            <Link href="/" className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors duration-200">
               BatasGPT
             </Link>
           </div>
@@ -52,45 +52,56 @@ export default function Navbar() {
               <>
                 <Link 
                   href="/login" 
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:scale-105 transition-all duration-300"
+                  className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link 
                   href="/register"
-                  className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
                 >
-                  Register
+                  Get Started
                 </Link>
               </>
             ) : (
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-white/50 hover:shadow-md transition-all duration-300"
+                  className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <span className="bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent font-medium">
-                    Hi, {user.name.split(' ').map((n: string, i: number) => i === 0 ? n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() : n.charAt(0).toUpperCase()).join(' ')}
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-medium">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-gray-700 font-medium">
+                    {user.name.split(' ').map((n: string) => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ')}
                   </span>
-                  <svg className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white/80 backdrop-blur-lg ring-1 ring-black/5 transform transition-all duration-300">
+                  <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div className="py-1">
                       <Link
                         href="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-100 hover:to-purple-100 transition-colors rounded-t-xl"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                       >
-                        Profile
+                        <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        View Profile
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-100 hover:to-purple-100 transition-colors rounded-b-xl"
+                        className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                       >
-                        Logout
+                        <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
                       </button>
                     </div>
                   </div>

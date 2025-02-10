@@ -31,6 +31,16 @@ export default function Post({
     day: 'numeric'
   });
 
+  const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPostContent(e.target.value);
+
+    //if user types @ it will show a dropdown of users or jurisprudences
+    if (e.target.value.includes('@')) {
+      const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/handle/search?q=${e.target.value}`);
+      console.log(data);
+    }
+  }
+
   const currentTime = new Date().toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit'
@@ -70,9 +80,9 @@ export default function Post({
   };
 
   return (
-    <div className="mb-6 max-w-2xl bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl border border-rose-100">
-      <div className="flex items-center mb-6">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 p-0.5 mr-4 transform hover:rotate-6 transition-transform duration-300">
+    <div className="mb-6 max-w-2xl bg-white/95 backdrop-blur-lg rounded-lg shadow-md p-6 transition-all duration-200 hover:shadow-lg border border-gray-100">
+      <div className="flex items-center mb-4">
+        <div className="w-12 h-12 rounded-full bg-blue-100 p-0.5 mr-4 transition-transform duration-200 hover:scale-105">
           <img 
             src={userAvatar}
             alt="Profile"
@@ -80,9 +90,9 @@ export default function Post({
           />
         </div>
         <div>
-          <div className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-purple-600 text-lg">{userName}</div>
+          <div className="font-semibold text-gray-900 text-base">{userName}</div>
           <div className="text-sm text-gray-500 flex items-center">
-            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
               <path d="M10 4a1 1 0 011 1v4.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V5a1 1 0 011-1z"/>
             </svg>
@@ -92,40 +102,42 @@ export default function Post({
       </div>
 
       {isEditing ? (
-        <div className="mb-4 space-y-4">
+        <div className="mb-4 space-y-3">
           <textarea
             value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
-            placeholder="Share your amazing thoughts..."
-            className="w-full p-4 border border-rose-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none bg-white/50 backdrop-blur-sm transition-all duration-300"
+            onChange={handleInputChange}
+            placeholder="Share your professional insights..."
+            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/50 transition-all duration-200"
             rows={4}
           />
           <button
             onClick={handlePost}
             disabled={isLoading}
-            className={`w-full py-3 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-xl font-medium transform transition-all duration-300 ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:from-rose-600 hover:to-purple-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+            className={`w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 ${
+              isLoading 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-blue-700 hover:shadow-md active:transform active:scale-[0.99]'
             }`}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
-                Creating magic...
+                Publishing...
               </div>
             ) : (
-              'Share with the world ✨'
+              'Share Post'
             )}
           </button>
         </div>
       ) : (
-        <div className="mb-4 text-gray-800 whitespace-pre-wrap leading-relaxed">{postContent}</div>
+        <div className="mb-4 text-gray-700 whitespace-pre-wrap leading-relaxed">{postContent}</div>
       )}
 
       {!isEditing && (
-        <div className="pt-4 border-t border-rose-100">
+        <div className="pt-3 ">
           <PostIcons
             initialLikes={likes}
-            initialComments={comments}
+            initialComments={comments} 
             initialShares={shares}
           />
         </div>

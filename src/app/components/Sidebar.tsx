@@ -57,28 +57,28 @@ export default function Sidebar({ activeMenu = 'for-you' }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 h-screen bg-gradient-to-b from-white to-rose-50 border-r border-rose-100 fixed left-0 top-0 shadow-xl">
+    <div className="w-64 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 shadow-md">
       <div className="flex flex-col h-full justify-center">
-        <nav className="px-2 py-4 space-y-2">
+        <nav className="px-3 py-6 space-y-1">
           {menuItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center px-4 py-3 text-gray-700 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+              className={`flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 hover:bg-blue-50 ${
                 activeMenu === item.href.slice(1)
-                  ? 'bg-gradient-to-r from-rose-500 to-purple-600 text-white shadow-lg'
-                  : 'hover:bg-gradient-to-r hover:from-rose-100 hover:to-purple-100'
+                  ? 'bg-blue-100 text-blue-800 font-semibold shadow-sm'
+                  : 'hover:text-blue-700'
               }`}
             >
-              <div className={`transform transition-transform duration-300 ${
-                activeMenu === item.href.slice(1) ? 'scale-110' : ''
+              <div className={`transform transition-transform duration-200 ${
+                activeMenu === item.href.slice(1) ? 'text-blue-600' : 'text-gray-500'
               }`}>
                 {item.icon}
               </div>
               <span className={`ml-3 font-medium ${
                 activeMenu === item.href.slice(1) 
-                  ? 'text-white'
-                  : 'bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent'
+                  ? 'text-blue-800'
+                  : 'text-gray-600'
               }`}>
                 {item.name}
               </span>

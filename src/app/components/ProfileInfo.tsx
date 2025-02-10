@@ -112,18 +112,10 @@ export default function ProfileInfo({
   };
 
   return (
-    <div className="p-6 transform transition-all duration-300 hover:scale-[1.01]">
-      <ProfileInfoModal
-        isOpen={showEditModal}
-        onClose={handleCloseEditModal}
-        onSave={handleSave}
-        initialName={name}
-        initialTitle={title}
-        initialBio={bio}
-      />
+    <div className="p-6 bg-white/95 backdrop-blur-lg rounded-xl shadow-md border border-gray-100">
       <div className="flex items-start space-x-6">
         <div className="flex-shrink-0 relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
           <div className="relative">
             <AvatarUpload
               currentAvatarUrl={avatarUrl}
@@ -136,52 +128,98 @@ export default function ProfileInfo({
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold text-gray-900">
                   {name.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </h2>
                 {isOwnProfile && (
                   <>
                     <button 
                       onClick={handleEdit}
-                      className="text-gray-500 hover:text-rose-500 transform transition-all duration-300 hover:scale-110 hover:rotate-12"
+                      className="text-gray-400 hover:text-blue-600 transform transition-all duration-200 hover:scale-105"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                       </svg>
                     </button>
-
-                    
                   </>
                 )}
               </div>
               <p className="text-gray-600 mt-1 font-medium">{title}</p>
+              <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span>Legal Professional</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Manila, Philippines</span>
+                </div>
+              </div>
             </div>
             <div className="flex space-x-3">
               {!isCurrentUser && (
                 <button
                   onClick={() => handleFollow(!isFollowing)}
-                className={`px-4 py-2 rounded-lg font-medium transform transition-all duration-300 hover:scale-105 ${
-                  isFollowing
-                    ? 'bg-gradient-to-r from-rose-100 to-purple-100 text-gray-800 hover:from-rose-200 hover:to-purple-200'
-                    : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white hover:from-rose-600 hover:to-purple-700 shadow-lg hover:shadow-rose-200/50'
-                }`}
-              >
-                {isFollowing ? (
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    isFollowing
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  {isFollowing ? (
                     <span className="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                       Following
                     </span>
-                  ) : 'Follow'}
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                      </svg>
+                      Follow
+                    </span>
+                  )}
                 </button>
-                )}
+              )}
             </div>
           </div>
           
-          <p className="text-gray-600 mt-4 leading-relaxed backdrop-blur-sm bg-white/30 p-4 rounded-lg shadow-sm border border-rose-100/50">
-            {bio}
-          </p>
+          <div className="mt-4 space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+              <p className="text-gray-700 leading-relaxed">
+                {bio}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="text-xl font-bold text-gray-900">152</div>
+                <div className="text-sm text-gray-500">Connections</div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="text-xl font-bold text-gray-900">28</div>
+                <div className="text-sm text-gray-500">Cases</div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="text-xl font-bold text-gray-900">5 yrs</div>
+                <div className="text-sm text-gray-500">Experience</div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">Criminal Law</span>
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">Civil Law</span>
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">Corporate Law</span>
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">Family Law</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
