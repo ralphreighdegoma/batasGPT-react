@@ -2,48 +2,30 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState<{name: string} | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // For now just get name from localStorage, later can fetch from API
-      const userName = localStorage.getItem('userName') || 'User';
-      setUser({ name: userName });
-      getUserProfile();
-    }
-  }, []);
-
-  //get user profile
-  const getUserProfile = async () => {
-    //NEXT_PUBLIC_API_URL
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    const data = await response.json();
-    setUser(data);
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userName');
-    setUser(null);
+    logout();
     router.push('/login');
   };
+  const handleTitle = () => {
+    return process.env.NEXT_PUBLIC_APP_TITLE;
+  };
+
+  const { user, authToken, login, logout } = useAuth();
+
 
   return (
-    <nav className="bg-white shadow-md relative z-50">
+    <nav className="bg-white shadow-md relative z-50 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors duration-200">
-              BatasGPT
+            <Link href="/news-feed" className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors duration-200">
+              {handleTitle()}
             </Link>
           </div>
           

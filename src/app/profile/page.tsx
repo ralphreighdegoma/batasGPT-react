@@ -6,37 +6,16 @@ import Sidebar from '../components/Sidebar';
 import ProfileAbout from '../components/ProfileAbout';
 import ProfileTab from '../components/ProfileTab';
 import MyPosts from '../components/MyPosts';
+import RightAdvert from '../components/RightAdvert';
+import { useAuth } from '../../context/AuthContext';
+import ProfileBanner from '../components/ProfileBanner';
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getUserProfile();
-  }, []);
-
-  //await get user profile
-  const getUserProfile = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
-      const data = await response.json();
-      setUser(data);
-      localStorage.setItem('user', JSON.stringify(data));
-      localStorage.setItem('id', data.id);
-      localStorage.setItem('name', data.name);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState(false);
+  const { user, authToken, login, logout } = useAuth();
 
   
-  if (loading) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
@@ -61,40 +40,36 @@ export default function ProfilePage() {
           <div className="w-32 h-32 border-4 border-indigo-200 rounded-full opacity-20"></div>
         </div>
       </div>
-
       <div className="fixed top-0 left-0 w-72 mt-6 ml-6 z-10">
         <Sidebar activeMenu="profile" />
       </div>
 
-      <div className="ml-80 flex-1 py-8 px-6 relative z-10">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-100">
-            <div className="p-8">
-              <ProfileInfo
-                id={user?.id}
-                name={user?.name}
-                title={user?.title}
-                bio={user?.bio}
-                avatarUrl={user?.avatar}
-              />
-            </div>
-            <div className="border-t border-gray-100">
-              <ProfileTab
-                tabs={[
-                  { 
-                    label: 'Posts', 
-                    content: <div className="p-8"><MyPosts /></div>
-                  },
-                  { 
-                    label: 'About', 
-                    content: <div className="p-8"><ProfileAbout /></div>
-                  },
-                ]}
-              />
-            </div>
+      <div className="ml-80 flex-1  max-w-4xl mx-auto">
+        <div className="bg-white/90 backdrop-blur-lg shadow-xl border border-gray-100">
+          <div className="">
+            <ProfileBanner
+              username={user?.name}
+              bio={user?.bio}
+              avatarUrl={user?.avatar}
+            />
+          </div>
+          <div className="border-t border-gray-100 mt-20">
+            <ProfileTab
+              tabs={[
+                { 
+                  label: 'Posts', 
+                  content: <div className="p-8"><MyPosts /></div>
+                },
+                { 
+                  label: 'About', 
+                  content: <div className="p-8"><ProfileAbout /></div>
+                },
+              ]}
+            />
           </div>
         </div>
       </div>
+      <RightAdvert />
     </div>
   );
 }

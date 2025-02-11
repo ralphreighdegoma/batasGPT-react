@@ -19,15 +19,6 @@ export default function Sidebar({ activeMenu = 'for-you' }: SidebarProps) {
       href: '/profile'
     },
     {
-      name: 'Post',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      ),
-      href: '/create-post'
-    },
-    {
       name: 'News Feed',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,45 +36,47 @@ export default function Sidebar({ activeMenu = 'for-you' }: SidebarProps) {
       ),
       href: '/notifications'
     },
-    {
-      name: 'Connections',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
-      href: '/connections'
-    }
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 shadow-md">
+    <div className="w-80 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 shadow-md ">
       <div className="flex flex-col h-full justify-center">
         <nav className="px-3 py-6 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 hover:bg-blue-50 ${
-                activeMenu === item.href.slice(1)
-                  ? 'bg-blue-100 text-blue-800 font-semibold shadow-sm'
-                  : 'hover:text-blue-700'
-              }`}
-            >
-              <div className={`transform transition-transform duration-200 ${
-                activeMenu === item.href.slice(1) ? 'text-blue-600' : 'text-gray-500'
-              }`}>
-                {item.icon}
-              </div>
-              <span className={`ml-3 font-medium ${
-                activeMenu === item.href.slice(1) 
-                  ? 'text-blue-800'
-                  : 'text-gray-600'
-              }`}>
-                {item.name}
-              </span>
-            </Link>
-          ))}
+          {menuItems
+            .filter(item => {
+              // Show profile, news feed and notifications only if logged in
+              const privateRoutes = ['/profile', '/news-feed', '/notifications', '/connections'];
+              const isPrivateRoute = privateRoutes.includes(item.href);
+              
+              // Get auth status from localStorage since we can't access session directly
+              const isLoggedIn = typeof window !== 'undefined' && localStorage.getItem('authToken');
+              
+              return !isPrivateRoute || isLoggedIn;
+            })
+            .map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 hover:bg-blue-50 ${
+                  activeMenu === item.href.slice(1)
+                    ? 'bg-blue-100 text-blue-800 font-semibold shadow-sm'
+                    : 'hover:text-blue-700'
+                }`}
+              >
+                <div className={`transform transition-transform duration-200 ${
+                  activeMenu === item.href.slice(1) ? 'text-blue-600' : 'text-gray-500'
+                }`}>
+                  {item.icon}
+                </div>
+                <span className={`ml-3 font-medium ${
+                  activeMenu === item.href.slice(1) 
+                    ? 'text-blue-800'
+                    : 'text-gray-600'
+                }`}>
+                  {item.name}
+                </span>
+              </Link>
+            ))}
         </nav>
       </div>
     </div>

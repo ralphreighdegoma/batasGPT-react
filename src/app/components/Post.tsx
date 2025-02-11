@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PostIcons from './PostIcons';
 import { toast } from 'react-hot-toast';
-
+import { useAuth } from '../../context/AuthContext';
 interface PostProps {
+  postId?: string;
   userAvatar?: string;
   userName?: string;
   content?: string;
@@ -12,7 +13,8 @@ interface PostProps {
 }
 
 export default function Post({ 
-  userAvatar = "https://randomuser.me/api/portraits/men/42.jpg",
+  postId = "",
+  userAvatar = "",
   userName = "Anonymous User",
   content = "",
   afterPost = () => {}
@@ -23,13 +25,14 @@ export default function Post({
   const [comments, setComments] = useState(0);
   const [shares, setShares] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
+  const { user, authToken, login, logout } = useAuth();
 
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long', 
     day: 'numeric'
   });
+
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPostContent(e.target.value);
@@ -46,7 +49,22 @@ export default function Post({
     minute: '2-digit'
   });
 
+  const handleUsername = () => {
+    return userName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
   const handlePost = async () => {
+    //check if content is empty
+    if (postContent.trim() === '') {
+      toast.error('Please enter a post');
+      return;
+    }
+
+    //check user if verified
+    if (!user.email_verified_at) {
+      toast.error('Please verify your email to post');
+      return;
+    }
 
     //show loading
     setIsLoading(true);
@@ -79,18 +97,34 @@ export default function Post({
     toast.success('Post created successfully');
   };
 
-  return (
-    <div className="mb-6 max-w-2xl bg-white/95 backdrop-blur-lg rounded-lg shadow-md p-6 transition-all duration-200 hover:shadow-lg border border-gray-100">
-      <div className="flex items-center mb-4">
-        <div className="w-12 h-12 rounded-full bg-blue-100 p-0.5 mr-4 transition-transform duration-200 hover:scale-105">
-          <img 
+  const handleAvatar = () => {
+    if (userAvatar) {
+      return (
+        <img 
             src={userAvatar}
             alt="Profile"
             className="w-full h-full rounded-full object-cover border-2 border-white"
           />
+      );
+    } else {
+      return (
+        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <span className="text-blue-600 font-medium">
+            {userName.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className="mb-6 max-w-2xl bg-white/95 backdrop-blur-lg rounded-lg shadow-md p-6 transition-all duration-200 hover:shadow-lg border border-gray-100">
+      <div className="flex items-center mb-4">
+        <div className="w-12 h-12 rounded-full bg-blue-100 p-0.5 mr-4 transition-transform duration-200 hover:scale-105">
+          {handleAvatar()}
         </div>
         <div>
-          <div className="font-semibold text-gray-900 text-base">{userName}</div>
+          <div className="font-semibold text-gray-900 text-base">{handleUsername()}</div>
           <div className="text-sm text-gray-500 flex items-center">
             <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
@@ -136,6 +170,7 @@ export default function Post({
       {!isEditing && (
         <div className="pt-3 ">
           <PostIcons
+            postId={postId}
             initialLikes={likes}
             initialComments={comments} 
             initialShares={shares}

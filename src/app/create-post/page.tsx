@@ -11,7 +11,7 @@ export default function CreatePost() {
     const getUserProfile = async () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${authToken}`
         }
       });
       const data = await response.json();

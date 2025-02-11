@@ -3,9 +3,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useAuth } from '../../context/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,7 +47,9 @@ export default function RegisterPage() {
         }),
       });
   
-      const data = await response.json();
+      const {data, token  } = await response.json();
+
+      
   
       if (!response.ok) {
         // Handle validation errors
@@ -54,10 +58,14 @@ export default function RegisterPage() {
         }
         throw new Error(data.message || 'Registration failed');
       }
-  
-      toast.success('Registration successful! Please log in.');
-      router.push('/login');
-      
+
+      console.log(data);
+
+      if (data.token) {
+        login(data.token, data.user);
+        toast.success('Registration successful! Please log in.');
+        window.location.href = '/news-feed';
+      }
     } catch (error: any) {
       toast.error(error.message);
       console.error("Registration error:", error);

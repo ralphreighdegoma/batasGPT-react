@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, ChangeEvent } from 'react';
+import { useAuth } from '../../context/AuthContext';
+
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string;
@@ -9,13 +11,15 @@ interface AvatarUploadProps {
 }
 
 export default function AvatarUpload({ 
-  currentAvatarUrl = "https://randomuser.me/api/portraits/men/42.jpg",
-  name = "User",
+  currentAvatarUrl,
+  name,
   onAvatarUpdate
 }: AvatarUploadProps) {
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, authToken, login, logout } = useAuth();
+
 
   const handleFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,7 +33,7 @@ export default function AvatarUpload({
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload-avatar`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${authToken}`
         },
         body: formData
       });
@@ -50,13 +54,23 @@ export default function AvatarUpload({
     fileInputRef.current?.click();
   };
 
+  const handleAvatar = () => {
+    if (avatarUrl) {
+      return <img src={avatarUrl} alt={`${name}'s profile`} className="w-24 h-24 rounded-full object-cover border-2 border-gray-200" />;
+    } else {
+      return (
+        <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
+          <span className="text-blue-600 font-large">
+            {name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="relative group">
-      <img
-        src={avatarUrl}
-        alt={`${name}'s profile`}
-        className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-      />
+      {handleAvatar()}
       
       <div 
         className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
