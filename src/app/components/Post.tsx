@@ -4,12 +4,37 @@ import { useState, useEffect } from 'react';
 import PostIcons from './PostIcons';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import PostContent from './PostContent';
+import PostWriting from './PostWriting/index';
+import { createPost } from '@/services/api/posts';
+import Link from 'next/link';
+import CommentBox from './CommentBox';
+import CommentBoxRead from './CommentBoxRead';
+import { createComment, getComments } from '@/services/api/comments';
+import NameComponent from './Defaults/NameComponent';
+import { likePost, getLikes } from "@/services/api/posts";
+import AvatarDisplayer from './Defaults/AvatarDisplayer';
+
+
+
+interface authToken {
+  authToken: string;
+}
+
 interface PostProps {
   postId?: string;
   userAvatar?: string;
   userName?: string;
   content?: string;
   afterPost?: () => void;
+  images?: string[];
+  audio?: string;
+  createdAt?: string;
+  tags?: string[];
+  hashId?: string;
+  isEditing?: boolean;
+  likesCount?: number;
+  commentsCount?: number;
 }
 
 export default function Post({ 
@@ -17,165 +42,208 @@ export default function Post({
   userAvatar = "",
   userName = "Anonymous User",
   content = "",
-  afterPost = () => {}
+  images = [],
+  audio = "",
+  afterPost = () => {},
+  createdAt = "",
+  tags = [],
+  hashId = "",
+  isEditing = false,
+  likesCount = 0,
+  commentsCount = 0
 }: PostProps) {
-  const [postContent, setPostContent] = useState(content);
-  const [isEditing, setIsEditing] = useState(!content);
-  const [likes, setLikes] = useState(0);
-  const [comments, setComments] = useState(0);
-  const [shares, setShares] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user, authToken, login, logout } = useAuth();
+  const [postContent, setPostContent] = useState<string>(content);
+  const [comments, setComments] = useState<any[]>([]);
+  const [shares, setShares] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showComments, setShowComments] = useState(false);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const { user, authToken } = useAuth();
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long', 
-    day: 'numeric'
-  });
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
 
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPostContent(e.target.value);
-
-    //if user types @ it will show a dropdown of users or jurisprudences
-    if (e.target.value.includes('@')) {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/handle/search?q=${e.target.value}`);
-      console.log(data);
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     }
-  }
+  };
 
-  const currentTime = new Date().toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const formattedDate = createdAt ? formatDate(createdAt) : '';
 
   const handleUsername = () => {
     return userName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
 
-  const handlePost = async () => {
-    //check if content is empty
-    if (postContent.trim() === '') {
-      toast.error('Please enter a post');
+  const handlePost = async (content: string, images: File[] | undefined, audio: File | undefined, tags: string[]) => {
+    if (content.trim() === '' && images?.length === 0 && audio) {
+      toast.error('Content is required.');
       return;
     }
 
-    //check user if verified
     if (!user.email_verified_at) {
       toast.error('Please verify your email to post');
       return;
     }
 
-    //show loading
     setIsLoading(true);
 
-
-    //add a 5 second delay to avoid spam
     await new Promise(resolve => setTimeout(resolve, 5000));
-
-    //remove content
-    setPostContent('');
-
-    //save to api
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/post`, {
-      method: 'POST',
-      body: JSON.stringify({ content: postContent }),
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+    const formData = new FormData();
+    formData.append('content', content);
+    images?.forEach((image, index) => {
+      formData.append(`images[]`, image);
     });
+    if (audio) {
+      formData.append('audio', audio);
+    }
+    if (tags.length > 0) {
+      formData.append('tags', JSON.stringify(tags));
+    }
+    try {
+      await createPost(formData, authToken);
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error('Failed to create post. Please try again.');
+      return;
+    }
 
-    //hide loading
     setIsLoading(false);
 
-    //call afterPost
     afterPost();
 
-    //show toast
     toast.success('Post created successfully');
   };
 
   const handleAvatar = () => {
-    if (userAvatar) {
-      return (
-        <img 
-            src={userAvatar}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover border-2 border-white"
-          />
-      );
-    } else {
-      return (
-        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-          <span className="text-blue-600 font-medium">
-            {userName.charAt(0).toUpperCase()}
-          </span>
-        </div>
-      );
-    }
+    if(!userName) { return false}
+    return (
+    <AvatarDisplayer username={userName} avatarUrl={userAvatar} />
+    )
   }
 
+  const handleCommentSubmit = async (comment: string) => {
+    try {
+      await createComment(comment, postId, authToken);
+      await getCommentsApi();
+    } catch (error) {
+      console.error("Failed to submit comment:", error);
+    }
+  };
+
+  const getCommentsApi = async () => {
+    try {
+      setLoadingComments(true);
+      const data = await getComments(postId, authToken);
+      if (data) {
+        setComments(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch comments:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleShowComments = async () => {
+    const newShowComments = !showComments;
+    setShowComments(newShowComments);
+    if (newShowComments) {
+      await getCommentsApi();
+    }
+  };
+
+  const loadingCommentsComponent = () => {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  };
+
   return (
-    <div className="mb-6 max-w-2xl bg-white/95 backdrop-blur-lg rounded-lg shadow-md p-6 transition-all duration-200 hover:shadow-lg border border-gray-100">
-      <div className="flex items-center mb-4">
-        <div className="w-12 h-12 rounded-full bg-blue-100 p-0.5 mr-4 transition-transform duration-200 hover:scale-105">
+    <div className="max-w-2xl bg-white/95 backdrop-blur-lg shadow-md p-6 transition-all duration-200 border-b border-gray-200">
+      {!isEditing && (
+        <div className="flex items-center mb-4">
           {handleAvatar()}
-        </div>
-        <div>
-          <div className="font-semibold text-gray-900 text-base">{handleUsername()}</div>
-          <div className="text-sm text-gray-500 flex items-center">
-            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
-              <path d="M10 4a1 1 0 011 1v4.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V5a1 1 0 011-1z"/>
-            </svg>
-            {currentDate} at {currentTime}
+          <div className="ml-2">
+            <Link href={`/profile/${hashId}`} className="font-semibold text-gray-900 text-base hover:text-blue-600 transition-colors duration-200">
+              <NameComponent userName={userName} />
+            </Link>
+            <div className="text-sm text-gray-500 flex items-center">
+              <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
+                <path d="M10 4a1 1 0 011 1v4.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V5a1 1 0 011-1z"/>
+              </svg>
+              {formattedDate}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {isEditing ? (
-        <div className="mb-4 space-y-3">
-          <textarea
-            value={postContent}
-            onChange={handleInputChange}
-            placeholder="Share your professional insights..."
-            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/50 transition-all duration-200"
-            rows={4}
-          />
-          <button
-            onClick={handlePost}
-            disabled={isLoading}
-            className={`w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 ${
-              isLoading 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'hover:bg-blue-700 hover:shadow-md active:transform active:scale-[0.99]'
-            }`}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
-                Publishing...
-              </div>
-            ) : (
-              'Share Post'
-            )}
-          </button>
-        </div>
+        <PostWriting onSubmit={handlePost} isLoading={isLoading} />
       ) : (
-        <div className="mb-4 text-gray-700 whitespace-pre-wrap leading-relaxed">{postContent}</div>
+        <PostContent content={postContent} images={images} audio={audio} tags={tags} />
       )}
 
       {!isEditing && (
-        <div className="pt-3 ">
-          <PostIcons
-            postId={postId}
-            initialLikes={likes}
-            initialComments={comments} 
-            initialShares={shares}
-          />
-        </div>
+        <>
+          <div className="pt-3">
+            <PostIcons
+              postId={postId}
+              onShowComments={handleShowComments}
+              likesCount={likesCount}
+              commentsCount={commentsCount}
+            />
+          </div>
+
+          {showComments && (
+            <div className="mt-4">
+              <CommentBox onCommentSubmit={handleCommentSubmit} />
+
+              {comments.length > 0 ? (
+                loadingComments ? (
+                  loadingCommentsComponent()
+                ) : (
+                  <div className="max-h-[500px] h-auto overflow-y-auto">
+                    {comments.map((comment) => (
+                      <CommentBoxRead
+                        key={comment.id}
+                        postId={postId}
+                        commentId={comment.id}
+                        comment={comment.comment}
+                        userName={comment.user.name}
+                        userAvatar={comment.user.avatar}
+                        createdAt={comment.created_at}
+                      />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <p className="text-gray-500 text-xs text-center mt-8">No comments yet</p>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

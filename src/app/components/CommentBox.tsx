@@ -9,30 +9,43 @@ interface CommentBoxProps {
 
 export default function CommentBox({ onCommentSubmit }: CommentBoxProps) {
   const [commentText, setCommentText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { authToken } = useAuth();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (commentText.trim()) {
-      onCommentSubmit(commentText);
+      setIsLoading(true);
+      // Random delay between 4-6 seconds
+      const delay = Math.floor(Math.random() * (6000 - 4000 + 1) + 4000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      await onCommentSubmit(commentText);
       setCommentText('');
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <input
         type="text"
         value={commentText}
         onChange={(e) => setCommentText(e.target.value)}
-        placeholder="Write a comment..."
-        className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleSubmit();
+          }
+        }}
+        placeholder={isLoading ? "Submitting..." : "Write a comment..."}
+        disabled={isLoading}
+        className="w-full p-2 border border-gray-200 text-sm rounded-[10px] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
       />
-      <button
-        onClick={handleSubmit}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Comment
-      </button>
+      {isLoading && (
+        <div className="ml-2 flex items-center">
+          <div className="animate-bounce mx-0.5 h-2 w-2 rounded-full bg-gray-400"></div>
+          <div className="animate-bounce mx-0.5 h-2 w-2 rounded-full bg-gray-400 delay-100"></div>
+          <div className="animate-bounce mx-0.5 h-2 w-2 rounded-full bg-gray-400 delay-200"></div>
+        </div>
+      )}
     </div>
   );
 }

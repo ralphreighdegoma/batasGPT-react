@@ -4,17 +4,18 @@ import { useState, useEffect } from 'react';
 import ProfileInfo from '../components/ProfileInfo';
 import Sidebar from '../components/Sidebar';
 import ProfileAbout from '../components/ProfileAbout';
-import ProfileTab from '../components/ProfileTab';
+import TabComponent from '../components/TabComponent';
 import MyPosts from '../components/MyPosts';
 import RightAdvert from '../components/RightAdvert';
 import { useAuth } from '../../context/AuthContext';
 import ProfileBanner from '../components/ProfileBanner';
+import MyFistbumps from '../components/MyFistbumps';
+
 export default function ProfilePage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user, authToken, login, logout } = useAuth();
 
-  
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -40,36 +41,37 @@ export default function ProfilePage() {
           <div className="w-32 h-32 border-4 border-indigo-200 rounded-full opacity-20"></div>
         </div>
       </div>
+
       <div className="fixed top-0 left-0 w-72 mt-6 ml-6 z-10">
         <Sidebar activeMenu="profile" />
       </div>
 
-      <div className="ml-80 flex-1  max-w-4xl mx-auto">
-        <div className="bg-white/90 backdrop-blur-lg shadow-xl border border-gray-100">
-          <div className="">
-            <ProfileBanner
-              username={user?.name}
-              bio={user?.bio}
-              avatarUrl={user?.avatar}
-            />
-          </div>
-          <div className="border-t border-gray-100 mt-20">
-            <ProfileTab
-              tabs={[
-                { 
-                  label: 'Posts', 
-                  content: <div className="p-8"><MyPosts /></div>
-                },
-                { 
-                  label: 'About', 
-                  content: <div className="p-8"><ProfileAbout /></div>
-                },
-              ]}
-            />
+      <div className="flex-1 flex justify-center">
+        <div className="w-full max-w-lg">
+          <div className="bg-white/90 backdrop-blur-lg shadow-xl border border-gray-100">
+            <div>
+              <ProfileBanner
+                username={user?.name}
+                bio={user?.bio}
+                avatarUrl={user?.avatar}
+                address={user?.address}
+                postCount={user?.postCount}
+              />
+            </div>
+            <div className="border-t border-gray-100">
+              <TabComponent
+                tabs={[
+                  { 
+                    label: 'Posts', 
+                    content: <div><MyPosts /></div>
+                  }
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
-      <RightAdvert />
+
     </div>
   );
 }

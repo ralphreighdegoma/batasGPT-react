@@ -7,12 +7,12 @@ interface TabItem {
   content: ReactNode;
 }
 
-interface ProfileTabProps {
+interface TabComponentProps {
   tabs: TabItem[];
   defaultTab?: number;
 }
 
-export default function ProfileTab({ tabs, defaultTab = 0 }: ProfileTabProps) {
+export default function TabComponent({ tabs, defaultTab = 0 }: TabComponentProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   return (

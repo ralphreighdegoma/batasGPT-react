@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import NameComponent from './Defaults/NameComponent';
 
 interface CommentBoxReadProps {
   postId: string;
@@ -40,13 +41,13 @@ export default function CommentBoxRead({ postId, commentId, comment, userName, u
   };
 
   return (
-    <div className="flex space-x-2 p-3 bg-gray-50 backdrop-blur-sm rounded-md shadow-md border-b border-gray-200 hover:border-blue-500 transition-colors" id={`comment-${commentId}`}>
+    <div className="flex space-x-2 p-3 bg-gray-50  rounded-md shadow-md border-b border-gray-200 hover:border-blue-500 transition-colors" id={`comment-${commentId}`}>
       <div className="flex-shrink-0">
         {handleAvatar()}
       </div>
       <div className="flex-1">
         <div className="flex items-center space-x-2">
-          <span className="font-medium text-gray-900">{userName}</span>
+          <NameComponent userName={userName} />
           <span className="text-sm text-gray-500">{formatDate(createdAt)}</span>
         </div>
         <p className="mt-1 text-gray-600 text-sm">{comment}</p>

@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import { Toaster } from 'react-hot-toast';
 import VerifyEmailNavbar from "./components/VerifyEmailNavbar";
 import { AuthProvider } from '../context/AuthContext';
+import { ThemeProvider } from '../components/ThemeProvider';
 
 // These styles apply to every route in the application
 import './globals.css'
@@ -21,12 +22,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <AuthProvider>
-          <div className="min-h-screen">
-            <VerifyEmailNavbar />
-            <Navbar />
-            {children}
-            <Toaster position="top-right" />
-          </div>
+          <ThemeProvider>
+            <div className="min-h-screen">
+              <VerifyEmailNavbar />
+              {children}
+              <Toaster position="top-right" />
+            </div>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import RightAdvert from '../components/RightAdvert';
 import toast, { Toaster } from 'react-hot-toast';
+import AvatarUpload from '../components/AvatarUpload';
+import { useAuth } from '@/context/AuthContext';
 
 interface FormData {
   name: string;
@@ -12,43 +14,61 @@ interface FormData {
   bio: string;
   aboutMe: string;
   address: string;
+  avatar?: string;
 }
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { user, authToken, login, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     title: '',
     bio: '',
     aboutMe: '',
-    address: ''
+    address: '',
+    avatar: ''
   });
 
   useEffect(() => {
+    if(!authToken) {
+      return;
+    }
     loadUserData();
-  }, []);
+  }, [authToken]);
 
   const loadUserData = async () => {
+    
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${authToken}`
         }
       });
       const data = await response.json();
+
       setFormData({
-        name: data.name || '',
-        title: data.title || '',
-        bio: data.bio || '',
-        aboutMe: data.aboutMe || '',
-        address: data.address || ''
+        name: data.user.name || '',
+        title: data.user.title || '',
+        bio: data.user.bio || '',
+        aboutMe: data.user.aboutMe || '',
+        address: data.user.address || '',
+        avatar: data.user.avatar || ''
       });
+
+
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAvatarUpdate = (newAvatarUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      avatar: newAvatarUrl
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,21 +79,24 @@ export default function EditProfilePage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       });
+      
+      const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('name', formData.name);
-        localStorage.setItem('title', formData.title);
-        localStorage.setItem('bio', formData.bio);
-        localStorage.setItem('aboutMe', formData.aboutMe);
-        localStorage.setItem('address', formData.address);
-        
-        router.push('/profile');
+        if(data.data) {
+          console.log("here")
+          console.log(data.data)
+          updateUser(data.data);
+          router.push('/profile');
+        }
       }
+
+      
     } catch (error) {
       toast.error(error as string);
     } finally {
@@ -152,6 +175,15 @@ export default function EditProfilePage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex justify-center mb-8">
+              <AvatarUpload
+                currentAvatarUrl={formData.avatar}
+                name={formData.name}
+                onAvatarUpdate={handleAvatarUpdate}
+                size="large"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Name
@@ -317,7 +349,6 @@ export default function EditProfilePage() {
         </div>
       </div>
 
-      <RightAdvert />
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function RightAdvert() {
     }
   ]);
   return (
-    <div className="sticky right-0 w-[330px] z-10">
+    <div className="hidden md:block sticky right-0 w-[330px] z-10">
       <div className="w-full max-w-sm bg-white shadow-md overflow-hidden h-screen">
         <div className="flex flex-col justify-center h-[calc(100%-4rem)] space-y-4 p-4">
           {ads.map((ad) => (

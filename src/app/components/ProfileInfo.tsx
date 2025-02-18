@@ -41,7 +41,7 @@ export default function ProfileInfo({
 
 
   useEffect(() => {
-    setIsOwnProfile(id == localStorage.getItem('id'));
+    setIsOwnProfile(id == user.id);
   }, [id]);
 
   const handleAvatarUpdate = (newAvatarUrl: string) => {

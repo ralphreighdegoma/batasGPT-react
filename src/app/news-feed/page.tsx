@@ -1,50 +1,61 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import Post from '../components/Post';
-import RightAdvert from '../components/RightAdvert';
-import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from "react";
+import Sidebar from "../components/Sidebar";
+import Post from "../components/Post";
+import RightAdvert from "../components/RightAdvert";
+import { useAuth } from "../../context/AuthContext";
+import NewsFeedSearch from "../components/NewsFeedSearch";
+import PostLoading from "../components/Defaults/PostLoading";
+import SearchAll from "../components/Defaults/SearchAll";
+import TabComponent from "../components/TabComponent";
+import ProfileListComponent from "../components/ProfileListComponent";
 
 export default function NewsFeedPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const { user, authToken, login, logout } = useAuth();
-
-
+  const [profiles, setProfiles] = useState([]);
+  const [query, setQuery] = useState('');
   const fetchPosts = async (pageNum = 1) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/news-feed?page=${pageNum}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
+      const query = new URLSearchParams(window.location.search).get('q') || '';
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/news-feed?page=${pageNum}${query ? `&q=${query}` : ''}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         }
-      });
+      );
       const data = await response.json();
-      
-      if (pageNum === 1) {
-        setPosts(data.posts);
-      } else {
-        setPosts(prevPosts => [...prevPosts, ...data.posts]);
-      }
-      
+
+      setPosts(data.posts);
+      setProfiles(data.profiles)
+
       setHasMore(data.hasMore);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
+  //detect query params
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search).get('q') || '';
+    setQuery(query);
+  }, [window.location.search]);
+
   useEffect(() => {
     if (authToken) {
       fetchPosts();
     }
-  }, [authToken]); 
+  }, [authToken]);
 
   const loadMore = async () => {
     if (loadingMore) return;
@@ -55,24 +66,83 @@ export default function NewsFeedPage() {
     await fetchPosts(nextPage);
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
+  const handleSearch = (term: string) => {
+    // Update the URL with the search term
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('q', term);
+    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.pushState({}, '', newUrl);
 
-  const handleAfterPost = () => {
-    setPage(1);
     fetchPosts(1);
   };
 
-  if (loading) {
+  const handleSuburbSelect = (suburb: string) => {
+    console.log(suburb);
+  };
+  const postsComponent = () => {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
-          <p className="mt-4 text-gray-600">Loading posts...</p>
+      <>
+      
+        <div className="h-screen overflow-y-auto relative">
+          {loading ? loadingComponent() : (
+            <>
+              {posts.map((post: {
+                id: string;
+                user: {
+                  avatar: string;
+                  name: string;
+                  hashId: string;
+                };
+                content: string;
+                images: string[];
+                audio: string;
+                created_at: string;
+                tags: string[];
+                likesCount: number;
+                commentsCount: number;
+              }, index: number) => (
+                <Post
+                  key={post.id || index}
+                  postId={post.id}
+                  userAvatar={post.user?.avatar}
+                  userName={post.user?.name}
+                  content={post.content}
+                  images={post.images}
+                  audio={post.audio}
+                  createdAt={post.created_at}
+                  tags={post.tags}
+                  hashId={post.user.hashId}
+                  likesCount={post.likesCount}
+                  commentsCount={post.commentsCount}
+                />
+              ))}
+            </>
+          )}
+          {posts.length == 0 && (
+            <div className="text-center ">
+              <p className="text-center py-4 text-gray-500">
+              No posts found.
+              </p>
+            </div>
+          )}
+          {/* Bottom shadow overlay to indicate more content */}
         </div>
-      </div>
+
+        
+      </>
+    );
+  }
+
+  const loadingComponent = () => {
+    return (
+      <>
+        <PostLoading />
+        <PostLoading />
+        <PostLoading />
+        <PostLoading />
+        <PostLoading />
+      </>
     );
   }
 
@@ -95,81 +165,33 @@ export default function NewsFeedPage() {
         <Sidebar activeMenu="news-feed" />
       </div>
 
-      <div className="ml-80 flex-1  max-w-4xl mx-auto">
-        <div className="bg-white/90 backdrop-blur-lg  shadow-xl border border-gray-100 h-screen">
-          <div className="p-8 space-y-6">
-            {/* Search Bar */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search posts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-300"
+      <div className=" flex-1 flex justify-center">
+        <div className="w-full max-w-lg">
+          <div className="bg-white/90 backdrop-blur-lg border border-gray-100 min-h-screen">
+            <div className="">
+              <SearchAll query={query} handleSearch={handleSearch} />
+              <TabComponent
+                tabs={[
+                  { 
+                    label: 'Posts', 
+                    content: <div>{postsComponent()}</div>
+                  },
+                  {
+                    label: 'Profiles',
+                    content: <div><ProfileListComponent profiles={profiles}/></div>
+                  },
+                  {
+                    label: 'Businesses',
+                    content: <div></div>
+                  }
+                ]}
               />
-              <svg
-                className="absolute left-3 top-3 h-5 w-5 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              
             </div>
-
-            {/* New Post Creation */}
-            <Post 
-              afterPost={handleAfterPost}
-              userAvatar={user?.avatar || undefined}
-              userName={user?.name || undefined}
-            />
-
-            {/* Posts List */}
-            {filteredPosts.map((post, index) => (
-              <Post
-                key={post.id || index}
-                userAvatar={post.user?.avatar}
-                userName={post.user?.name}
-                content={post.content}
-              />
-            ))}
-
-            {filteredPosts.length === 0 && (
-              <div className="text-center py-10">
-                <p className="text-gray-600 font-medium">No posts found. Be the first to share something!</p>
-              </div>
-            )}
-
-            {/* Load More Button */}
-            {hasMore && (
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {loadingMore ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                      <span>Loading...</span>
-                    </>
-                  ) : (
-                    'Load More'
-                  )}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      <RightAdvert />
     </div>
   );
 }
